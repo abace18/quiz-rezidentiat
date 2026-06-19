@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Expert de Calibrare Clinică - Rezidențiat România</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        indigo: {
+                            950: '#030712',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .likert-btn {
+            background-color: rgba(15, 23, 42, 0.6); 
+            border: 2px solid rgba(30, 41, 59, 1);   
+        }
+        .likert-btn:hover {
+            border-color: rgba(99, 102, 241, 0.5);   
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        .likert-number {
+            background-color: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(51, 65, 85, 1);
+        }
+        .likert-btn:hover .likert-number {
+            background-color: rgba(79, 70, 229, 1); 
+            color: white;
+            border-color: rgba(79, 70, 229, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-xl shadow-lg shadow-indigo-500/10">
+                    <i class="fa-solid fa-brain text-xl animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold text-white tracking-tight">SISTEM EXPERT DE ORIENTARE ÎN REZIDENȚIAT</h1>
+                    <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Model Matematic Vectorial Unificat 10D</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs bg-slate-800 border border-slate-700 font-semibold px-3 py-1.5 rounded-lg text-slate-300">
+                    40 Afirmații de Înaltă Rezoluție
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4 md:p-8">
+        <div class="max-w-3xl w-full">
+
+            <div id="screen-intro" class="bg-slate-900/60 border border-slate-800 rounded-3xl shadow-2xl p-6 md:p-10 text-center fade-in">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 mb-6 border border-indigo-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+                    Algoritm Ierarhic Extins (25 Generale + 15 Specifice)
+                </span>
+                
+                <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+                    Calibrare Extinsă de Precizie
+                </h2>
+                <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed text-left">
+                    Acest instrument măsoară distanța matematică dintre profilul tău și cele 58 de specialități. Am extins setul la <strong>40 de afirmații asertive</strong> pentru a capta nuanțe fine de comportament, toleranță la frustrare, leadership și antreprenoriat.
+                    <br><br>
+                    <strong>Sistemul este adaptiv:</strong> După primele 25 de afirmații generale, algoritmul va identifica ramura ta de forță și va genera încă 15 afirmații ultra-specifice acelei categorii.
+                </p>
+
+                <button onclick="adaptEngine.start()" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold rounded-xl transition duration-200 shadow-lg shadow-indigo-500/10 flex items-center justify-center gap-3 mx-auto">
+                    <span>Inițiază Analiza Psihometrică</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div id="screen-quiz" class="hidden bg-slate-900/40 border border-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 fade-in">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span id="badge-stage" class="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 text-xs font-extrabold rounded-md uppercase tracking-wider border border-indigo-500/20">
+                            Etapa 1: Profilare Generală
+                        </span>
+                        <span id="badge-category" class="px-2.5 py-1 bg-slate-800 text-slate-400 text-[10px] font-bold rounded-md uppercase border border-slate-700">
+                            Cognitiv
+                        </span>
+                    </div>
+                    <span id="question-counter" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Afirmația 1 din 40</span>
+                </div>
+
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-8">
+                    <div id="progress-indicator" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <h3 id="question-text" class="text-lg md:text-xl font-bold text-white mb-8 leading-snug">
+                    Încărcare...
+                </h3>
+
+                <div id="options-container" class="space-y-3">
+                    <!-- Butoanele Likert 1-5 -->
+                </div>
+            </div>
+
+            <div id="screen-transition" class="hidden bg-slate-900/60 border border-slate-800 rounded-3xl shadow-2xl p-8 md:p-12 text-center fade-in max-w-xl mx-auto">
+                <div class="w-16 h-16 bg-purple-500/10 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-500/20">
+                    <i class="fa-solid fa-shuffle text-2xl animate-spin" style="animation-duration: 3s"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-white mb-2">Ramificare Algoritm în Timp Real</h3>
+                <p class="text-sm text-slate-400 mb-6 leading-relaxed">
+                    Pe baza profilului tău comportamental din Etapa 1, algoritmul a calculat o predispoziție clară către:
+                </p>
+                <div class="inline-block px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-xl mb-6">
+                    <span id="transition-branch-name" class="font-black text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent uppercase tracking-wider">
+                        Ramură Clinică
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mb-6">
+                    Următoarele 15 afirmații vor fi generate adaptiv, specifice acestei categorii, pentru a rafina procentele de compatibilitate.
+                </p>
+                <button onclick="adaptEngine.continueToStage2()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/10">
+                    Continuă Evaluarea
+                </button>
+            </div>
+
+            <div id="screen-results" class="hidden bg-slate-900/40 border border-slate-800 rounded-3xl shadow-2xl p-6 md:p-8 fade-in">
+                <div class="text-center mb-8 pb-6 border-b border-slate-800">
+                    <div class="w-14 h-14 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-500/20">
+                        <i class="fa-solid fa-clipboard-user text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Rezultatul Profilării Tale 10D</h2>
+                    <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest font-bold">Matrice de potrivire vectorială de înaltă calibrare</p>
+                </div>
+
+                <div id="locks-notifications" class="space-y-2 mb-6 hidden"></div>
+
+                <div class="mb-10">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-bar text-indigo-400"></i> 1. Profilul tău vectorial (Scor 0-10):
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="macro-dashboard"></div>
+                </div>
+
+                <div class="mb-10">
+                    <h3 class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-award text-purple-400"></i> 2. Top 5 Specialități Recomandate Exact:
+                    </h3>
+                    <div class="space-y-3" id="top-5-container"></div>
+                </div>
+
+                <div class="mb-8">
+                    <button onclick="toggleAllSpecialties()" class="w-full py-3 bg-slate-800 border border-slate-700 rounded-xl text-slate-300 font-bold text-xs hover:bg-slate-700/70 transition flex items-center justify-center gap-2 uppercase tracking-wider">
+                        <span>Vezi compatibilitatea cu toate cele 58 de specialități</span>
+                        <i id="toggle-icon" class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    
+                    <div id="all-specialties-container" class="hidden mt-4 space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                        <div class="relative mb-3">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" id="specialty-search" onkeyup="filterSpecialties()" class="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" placeholder="Caută o specialitate anume...">
+                        </div>
+                        <div id="all-specialties-list" class="space-y-2 max-h-96 overflow-y-auto pr-2 custom-scroll"></div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <button onclick="location.reload()" class="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 uppercase tracking-wider">
+                        <i class="fa-solid fa-rotate-left"></i> Reîncepe scanarea
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Dimensiuni: [Manual, Acute, PatientContact, Puzzle, Lifestyle, ChildLove, ChildTrauma, Tech, Teamwork, Entrepreneurial]
+        const SPECIALTIES_CATALOG = [
+            { name: "ALERGOLOGIE ȘI IMUNOLOGIE CLINICĂ", cat: "MEDICAL", isSurgPure: false, profile: [2, 1, 7, 9, 8, 4, 2, 3, 2, 7] },
+            { name: "ANATOMIE PATOLOGICĂ", cat: "PARACLINIC", isSurgPure: false, profile: [5, 1, 1, 10, 8, 1, 1, 9, 1, 4] },
+            { name: "ANESTEZIE ȘI TERAPIE INTENSIVĂ", cat: "SURGICAL", isSurgPure: false, profile: [8, 10, 2, 9, 1, 3, 4, 8, 8, 2] },
+            { name: "BOLI INFECȚIOASE", cat: "MEDICAL", isSurgPure: false, profile: [2, 5, 8, 9, 5, 4, 3, 4, 4, 4] },
+            { name: "CARDIOLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [5, 8, 7, 9, 4, 3, 2, 8, 5, 6] },
+            { name: "CARDIOLOGIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: false, profile: [5, 8, 6, 9, 4, 9, 8, 8, 5, 5] },
+            { name: "CHIRURGIE CARDIOVASCULARĂ", cat: "SURGICAL", isSurgPure: true, profile: [10, 10, 3, 8, 1, 2, 3, 9, 9, 3] },
+            { name: "CHIRURGIE GENERALĂ", cat: "SURGICAL", isSurgPure: true, profile: [9, 9, 4, 7, 2, 2, 3, 7, 8, 4] },
+            { name: "CHIRURGIE ORALĂ ȘI MAXILO-FACIALĂ", cat: "SURGICAL", isSurgPure: true, profile: [9, 7, 5, 7, 4, 2, 2, 8, 7, 7] },
+            { name: "CHIRURGIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: true, profile: [9, 8, 4, 7, 2, 10, 9, 7, 8, 4] },
+            { name: "CHIRURGIE PLASTICĂ, ESTETICĂ ȘI MICROCHIRURGIE RECONSTRUCTIVĂ", cat: "SURGICAL", isSurgPure: true, profile: [10, 4, 7, 7, 6, 2, 2, 8, 6, 9] },
+            { name: "CHIRURGIE TORACICĂ", cat: "SURGICAL", isSurgPure: true, profile: [9, 8, 3, 7, 2, 1, 2, 7, 8, 3] },
+            { name: "CHIRURGIE VASCULARĂ", cat: "SURGICAL", isSurgPure: true, profile: [9, 8, 4, 7, 2, 1, 2, 7, 8, 3] },
+            { name: "DERMATOVENEROLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [4, 2, 6, 6, 9, 3, 1, 6, 2, 8] },
+            { name: "DIABET ZAHARAT, NUTRIȚIE ȘI BOLI METABOLICE", cat: "MEDICAL", isSurgPure: false, profile: [2, 2, 8, 7, 9, 2, 1, 5, 2, 8] },
+            { name: "ENDOCRINOLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [2, 2, 7, 8, 9, 2, 1, 5, 2, 8] },
+            { name: "EPIDEMIOLOGIE", cat: "PARACLINIC", isSurgPure: false, profile: [1, 2, 2, 8, 9, 1, 1, 7, 3, 4] },
+            { name: "EXPERTIZA MEDICALĂ A CAPACITĂȚII DE MUNCĂ", cat: "PARACLINIC", isSurgPure: false, profile: [1, 1, 4, 7, 10, 1, 1, 5, 2, 5] },
+            { name: "FARMACOLOGIE CLINICĂ", cat: "PARACLINIC", isSurgPure: false, profile: [1, 1, 2, 9, 9, 1, 1, 8, 3, 4] },
+            { name: "GASTROENTEROLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [6, 6, 6, 8, 5, 1, 1, 7, 4, 6] },
+            { name: "GASTROENTEROLOGIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: false, profile: [6, 5, 5, 8, 5, 10, 6, 7, 4, 5] },
+            { name: "GENETICĂ MEDICALĂ", cat: "PARACLINIC", isSurgPure: false, profile: [2, 1, 6, 10, 9, 4, 2, 8, 3, 5] },
+            { name: "GERIATRIE ȘI GERONTOLOGIE", cat: "RELATIONAL", isSurgPure: false, profile: [2, 2, 9, 7, 7, 1, 1, 4, 3, 5] },
+            { name: "HEMATOLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [3, 5, 7, 9, 5, 2, 2, 7, 3, 5] },
+            { name: "IGIENĂ", cat: "PARACLINIC", isSurgPure: false, profile: [1, 1, 2, 7, 10, 1, 1, 4, 3, 3] },
+            { name: "MEDICINA MUNCII", cat: "PARACLINIC", isSurgPure: false, profile: [1, 1, 4, 6, 10, 1, 1, 4, 2, 6] },
+            { name: "MEDICINĂ DE FAMILIE", cat: "RELATIONAL", isSurgPure: false, profile: [2, 3, 9, 7, 8, 6, 3, 5, 2, 10] },
+            { name: "MEDICINĂ DE LABORATOR", cat: "PARACLINIC", isSurgPure: false, profile: [3, 1, 1, 9, 9, 1, 1, 9, 1, 5] },
+            { name: "MEDICINĂ DE URGENȚĂ", cat: "SURGICAL", isSurgPure: false, profile: [6, 10, 4, 8, 1, 4, 5, 7, 9, 1] },
+            { name: "MEDICINĂ FIZICĂ ȘI DE REABILITARE", cat: "RELATIONAL", isSurgPure: false, profile: [3, 1, 8, 6, 9, 2, 1, 5, 4, 7] },
+            { name: "MEDICINĂ INTERNĂ", cat: "MEDICAL", isSurgPure: false, profile: [2, 4, 8, 10, 5, 1, 1, 5, 4, 5] },
+            { name: "MEDICINĂ LEGALĂ", cat: "PARACLINIC", isSurgPure: false, profile: [4, 5, 2, 9, 7, 1, 3, 8, 2, 4] },
+            { name: "MEDICINĂ NUCLEARĂ", cat: "PARACLINIC", isSurgPure: false, profile: [3, 2, 3, 9, 8, 1, 1, 9, 3, 6] },
+            { name: "MEDICINĂ SPORTIVĂ", cat: "PARACLINIC", isSurgPure: false, profile: [3, 2, 7, 6, 9, 2, 1, 6, 3, 6] },
+            { name: "MICROBIOLOGIE MEDICALĂ", cat: "PARACLINIC", isSurgPure: false, profile: [3, 1, 1, 9, 9, 1, 1, 8, 2, 5] },
+            { name: "NEFROLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [3, 5, 8, 9, 5, 1, 1, 6, 3, 5] },
+            { name: "NEFROLOGIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: false, profile: [3, 5, 6, 9, 5, 10, 8, 6, 3, 4] },
+            { name: "NEONATOLOGIE", cat: "PEDIATRIC", isSurgPure: false, profile: [6, 9, 2, 9, 1, 10, 9, 8, 7, 1] },
+            { name: "NEUROCHIRURGIE", cat: "SURGICAL", isSurgPure: true, profile: [10, 9, 3, 9, 1, 1, 4, 9, 8, 3] },
+            { name: "NEUROLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [2, 4, 8, 10, 5, 1, 1, 7, 3, 6] },
+            { name: "NEUROLOGIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: false, profile: [2, 4, 8, 10, 5, 10, 7, 7, 3, 5] },
+            { name: "OBSTETRICĂ-GINECOLOGIE", cat: "SURGICAL", isSurgPure: true, profile: [8, 8, 6, 7, 3, 2, 3, 7, 7, 8] },
+            { name: "OFTALMOLOGIE", cat: "SURGICAL", isSurgPure: true, profile: [8, 3, 6, 6, 8, 3, 2, 8, 3, 8] },
+            { name: "ONCOLOGIE MEDICALĂ", cat: "RELATIONAL", isSurgPure: false, profile: [2, 5, 9, 9, 5, 1, 3, 6, 3, 6] },
+            { name: "ONCOLOGIE ȘI HEMATOLOGIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: false, profile: [2, 6, 8, 9, 4, 10, 10, 6, 4, 4] },
+            { name: "ORTOPEDIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: true, profile: [9, 6, 4, 7, 4, 10, 8, 7, 7, 5] },
+            { name: "ORTOPEDIE ȘI TRAUMATOLOGIE", cat: "SURGICAL", isSurgPure: true, profile: [9, 8, 4, 7, 3, 1, 2, 7, 8, 5] },
+            { name: "OTORINOLARINGOLOGIE", cat: "SURGICAL", isSurgPure: true, profile: [8, 4, 6, 6, 7, 4, 2, 7, 4, 7] },
+            { name: "PEDIATRIE", cat: "PEDIATRIC", isSurgPure: false, profile: [2, 4, 8, 8, 5, 10, 8, 4, 4, 5] },
+            { name: "PNEUMOLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [4, 4, 8, 8, 6, 1, 1, 6, 3, 6] },
+            { name: "PNEUMOLOGIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: false, profile: [4, 4, 7, 8, 6, 10, 8, 6, 3, 5] },
+            { name: "PSIHIATRIE", cat: "RELATIONAL", isSurgPure: false, profile: [1, 3, 10, 9, 7, 1, 1, 4, 2, 8] },
+            { name: "PSIHIATRIE PEDIATRICĂ", cat: "PEDIATRIC", isSurgPure: false, profile: [1, 3, 9, 9, 7, 10, 8, 4, 2, 7] },
+            { name: "RADIOLOGIE-IMAGISTICĂ MEDICALĂ", cat: "PARACLINIC", isSurgPure: false, profile: [3, 3, 2, 9, 7, 3, 1, 9, 4, 7] },
+            { name: "RADIOTERAPIE", cat: "PARACLINIC", isSurgPure: false, profile: [3, 2, 5, 9, 7, 1, 1, 9, 3, 5] },
+            { name: "REUMATOLOGIE", cat: "MEDICAL", isSurgPure: false, profile: [2, 2, 8, 9, 8, 1, 1, 6, 2, 7] },
+            { name: "SĂNĂTATE PUBLICĂ ȘI MANAGEMENT", cat: "PARACLINIC", isSurgPure: false, profile: [1, 1, 3, 8, 9, 1, 1, 5, 5, 6] },
+            { name: "UROLOGIE", cat: "SURGICAL", isSurgPure: true, profile: [8, 7, 5, 7, 4, 1, 1, 7, 7, 6] }
+        ];
+
+        // ETAPA 1: 25 Afirmații
+        const STAGE_1_QUESTIONS = [
+            { text: "Atunci când am în față un set de date medicale contradictorii, procesul intelectual de a le pune cap la cap ca pe un puzzle îmi oferă o satisfacție profundă.", category: "Stil Cognitiv", mods: [0, -0.5, 0, 2.5, 0.5, 0, 0, 1.0, -0.5, 0] },
+            { text: "Activitatea de a repara direct, macroscopic și mecanic o structură anatomică îmi provoacă o satisfacție profesională superioară oricărui diagnostic teoretic.", category: "Satisfacție Profesională", mods: [2.5, 1.0, -1.0, -1.0, -1.0, 0, 0, 0, 1.0, 0] },
+            { text: "În fața unei decizii de urgență vitală imediată, raționamentul meu funcționează impecabil, devenind extrem de rapid și concentrat.", category: "Management Stres", mods: [0.5, 2.5, -0.5, 0.5, -1.5, 0, 0, 0, 1.5, 0] },
+            { text: "Echilibrul viață-muncă, weekendurile libere garantate și lipsa totală a orelor de gardă din timpul nopții sunt priorități absolute pentru viitorul meu.", category: "Stil de Viață", mods: [-1.0, -2.5, 0.5, 0.5, 2.5, 0, 0, 0, -1.5, 1.0] },
+            { text: "Sunt complet imun din punct de vedere biologic la mirosurile neplăcute, secrețiile organice abundente sau expunerea directă la plăgi deschise.", category: "Senzorialitate", mods: [1.5, 1.0, -0.5, 0, -0.5, 0, 0, -0.5, 0, 0], lockTrigger: { type: "surgical", threshold: -0.5 } },
+            { text: "Interfața mea principală de lucru ideală este formată din ecrane de înaltă definiție, softuri de reconstrucție 3D sau echipamente de laborator.", category: "Afinitate Tehnologică", mods: [-1.0, -1.0, -2.0, 1.0, 1.5, 0, 0, 2.5, -1.0, 0] },
+            { text: "Comunicarea extinsă, ascultarea activă și consilierea îndelungată a pacienților reprezintă pentru mine esența pură a actului medical.", category: "Interacțiune Umană", mods: [-1.0, -1.0, 2.5, 0.5, 0.5, 1.0, 0, -1.5, -0.5, 1.0] },
+            { text: "Pot rămâne complet calm, empatic și eficient chiar și atunci când interacționez constant cu copii mici agitați și părinți extrem de stresați.", category: "Răbdare", mods: [0, 0.5, 1.0, 0.5, -0.5, 2.5, 0, 0, 0, 0], lockTrigger: { type: "pediatric", threshold: -0.5 } },
+            { text: "Am anduranța psihologică necesară pentru a asista în mod repetat la degradarea fizică sau decesul pacienților vulnerabili (inclusiv pediatrici).", category: "Rezistență Emoțională", mods: [0.5, 1.5, 0.5, 1.0, -0.5, 0, 2.5, 0, 0, 0] },
+            { text: "Prefer să lucrez integrat în echipe medicale mari, în medii cu dinamism intens, decât complet izolat într-un cabinet privat sau laborator.", category: "Dinamica Muncii", mods: [1.0, 1.5, 0, 0, -1.0, 0, 0, -1.0, 2.5, -1.5] },
+            { text: "Scopul meu principal în carieră este să îmi dezvolt propriul cabinet independent, gestionând atât actul medical, cât și afacerea în sine.", category: "Antreprenoriat", mods: [-1.0, -1.5, 1.5, 0.5, 2.0, 0, 0, 0, -2.0, 2.5] },
+            { text: "Mă atrage profund activitatea de a analiza date la nivel macro, de a scrie protocoale sau de a optimiza sănătatea la nivel de populație.", category: "Gândire Sistemică", mods: [-1.5, -1.5, -1.0, 1.5, 2.0, 0, 0, 1.5, -1.0, 0] },
+            { text: "Sunt dispus să aloc ore în șir studiului literaturii de specialitate pentru a rezolva un singur caz diagnostic foarte rar și nuanțat.", category: "Răbdare Intelectuală", mods: [-0.5, -1.0, 0.5, 2.5, 0, 0, 0, 1.0, -0.5, 0] },
+            { text: "Prefer să lucrez cu pacienți cronici, pe care să îi pot stabiliza și urmări pe parcursul a zeci de ani, cunoscându-le întreg istoricul familial.", category: "Medicină pe Termen Lung", mods: [-1.0, -1.0, 2.5, 1.0, 1.5, 1.0, 0, -1.0, -1.0, 1.5] },
+            { text: "Mă fascinează ideea de a utiliza instrumente de înaltă finețe și microchirurgie sub lupă pentru proceduri ce necesită precizie milimetrică.", category: "Micro-dexteritate", mods: [2.5, -1.0, -1.0, 1.0, 0.5, 0, 0, 1.5, -0.5, 0.5] },
+            { text: "Prefer să lucrez strict după ghiduri internaționale clare și algoritmi standardizați, decât să fiu nevoit să improvizez sau să bâjbâi în incertitudine clinică.", category: "Toleranță la Ambiguitate", mods: [-0.5, -1.5, 0, -1.0, 1.5, 0, 0, 1.0, 0, 0] },
+            { text: "Am nevoie să văd rezultatul muncii mele relativ repede; tratamentele a căror eficiență se observă abia după luni sau ani mă demotivează.", category: "Recompensă Imediată", mods: [1.5, 2.0, -1.0, -1.0, -1.0, 0, 0, 0, 1.0, 0] },
+            { text: "Îmi place să îmi asum rolul de lider, să coordonez activitatea altor medici și să fiu eu cel care poartă responsabilitatea finală în momente grele.", category: "Leadership", mods: [0.5, 1.5, 0, 0, -1.0, 0, 0, 0, 2.5, 2.0] },
+            { text: "Mă frustrează profund pacienții care nu respectă tratamentul prescris (non-complianții) și care revin constant cu aceleași exacerbări din vina lor.", category: "Toleranță Socială", mods: [0.5, 0, -2.0, 0, 0, 0, 0, 1.0, 0, 0] },
+            { text: "Aș alege întotdeauna să corectez un os fracturat sau un organ perforat, în detrimentul ajustării unor doze chimice de insulină sau hormoni.", category: "Viziune Medicală", mods: [2.5, 1.0, -1.0, -1.5, -1.0, 0, 0, 0, 1.0, 0] },
+            { text: "Aș prefera confortul fizic de a sta la un birou confortabil 8 ore pe zi, în loc de a alerga constant pe holurile secțiilor de spital.", category: "Confort Static", mods: [-1.5, -2.0, 0, 1.0, 2.5, 0, 0, 2.0, -1.5, 0] },
+            { text: "Dacă un coleg face o greșeală medicală care ar pune pacientul în pericol, aș raporta instant situația, trecând peste orice relație de prietenie.", category: "Integritate Obiectivă", mods: [0, 0, 0, 1.0, 0, 0, 0, 1.0, -1.5, 1.0] },
+            { text: "Sunt extrem de interesat de branding personal, de a atrage pacienți prin marketing pe social media și de a-mi crește profitabilitatea practicii mele.", category: "Marketing Medical", mods: [-1.0, -1.5, 1.5, 0, 1.0, 0, 0, 0, -1.0, 2.5] },
+            { text: "Tolerez foarte bine rutina zilnică: a efectua același tipar de 10-15 ori pe zi nu mă obosește, ci îmi creează un sentiment de măiestrie și siguranță.", category: "Rutină", mods: [1.0, -1.5, 0, -1.0, 2.0, 0, 0, 1.5, -1.0, 1.0] },
+            { text: "Aș fi dispus să provoc intenționat o durere ascuțită, temporară unui pacient (ex: reducerea unei fracturi), știind că acesta este singurul mod de a-l vindeca pe loc.", category: "Pragmatism Dur", mods: [2.0, 1.5, -1.0, 0, 0, 0, 0, 0, 0, 0] }
+        ];
+
+        // ETAPA 2: 15 Afirmații Aprofundate per Ramură
+        const DEEP_DIVE_BRANCHES = {
+            SURGICAL: {
+                name: "Chirurgie & Intervențional",
+                questions: [
+                    { text: "Prefer intervențiile chirurgicale de anvergură mare (incizii largi, forță mecanică, traumă) în detrimentul procedurilor minim-invazive sau endoscopice.", mods: [2.0, 1.5, -0.5, -0.5, -1.0, 0, 0, -1.0, 1.5, 0] },
+                    { text: "Vreau să gestionez personal și tratamentul medical complex al pacientului în ATI (hemodinamică, dezechilibre acido-bazice) după operație.", mods: [0, 2.0, 0.5, 1.5, -1.5, 0, 0, 0, 1.0, 0] },
+                    { text: "Sunt extrem de atras de chirurgia estetică, plastică sau funcțională, unde calitatea vieții și detaliul vizual sunt focusul principal.", mods: [1.5, -1.5, 1.0, 0.5, 1.5, 0, 0, 0.5, -0.5, 2.0] },
+                    { text: "Sunt dispus să tolerez oboseala fizică statică de a sta în picioare în sală, purtând echipament greu (șorț plumb), ore în șir.", mods: [1.5, 1.0, 0, 0, -1.5, 0, 0, 0, 1.0, 0] },
+                    { text: "Frica de a comite o eroare fatală de mișcare nu mă paralizează niciodată; stresul acut mă face mai performant în sală.", mods: [1.0, 2.5, -1.0, 0, -1.0, 0, 0, 0, 1.0, 0] },
+                    { text: "Mă atrage foarte mult utilizarea tehnologiei avansate, cum ar fi chirurgia robotică sau navigația 3D intraoperatorie.", mods: [1.0, 0.5, -1.0, 1.0, 0, 0, 0, 2.5, 0.5, 0] },
+                    { text: "Prefer să operez pacienți cu patologii cronice severe vasculare, unde trebuie să lupt agresiv pentru a salva membre sau organe.", mods: [1.5, 1.0, 1.0, 1.0, -1.0, 0, 0, 0, 1.0, 0] },
+                    { text: "Vreau să fiu liderul absolut în sala de operație: eu iau deciziile finale, iar restul echipei execută impecabil.", mods: [1.0, 1.5, -1.0, 0, 0, 0, 0, 0, 2.0, 0.5] },
+                    { text: "Sunt pregătit să particip frecvent la gărzi de traumatologie majoră pe timpul nopții pe parcursul întregii mele cariere.", mods: [1.0, 2.5, -0.5, 0, -2.5, 0, 1.0, 0, 1.5, 0] },
+                    { text: "Sunt dispus să dedic ani suplimentari de antrenament intens pentru a stăpâni o nișă chirurgicală cu o curbă de învățare foarte lungă (ex. neuro).", mods: [1.5, 1.0, -0.5, 1.5, -1.5, 0, 0, 1.0, 1.0, 0] },
+                    { text: "În situații în care anatomia pacientului este surprinzător de deformată față de CT, mă adaptez și improvizez soluții tehnice on-the-fly cu ușurință.", mods: [1.5, 2.0, 0, 0.5, 0, 0, 0, 0, 1.0, 0] },
+                    { text: "Aș alege o intervenție de 10 ore care extirpă complet o tumoră masivă în loc de 10 operații scurte de 30 minute de cataractă.", mods: [1.5, 1.0, -1.0, 0.5, -2.0, 0, 0, -1.0, 1.5, -1.0] },
+                    { text: "Pentru mine, comunicarea empatica post-operatorie cu familia pacientului este aproape la fel de importantă ca operația în sine.", mods: [-0.5, -0.5, 2.0, 0, 0.5, 0, 0, 0, 0.5, 1.0] },
+                    { text: "Consider că a scrie bilete operatorii și rapoarte de sală detaliate este o corvoadă inutilă pe care aș vrea să o deleg mereu.", mods: [1.5, 1.0, -1.0, -1.0, -0.5, 0, 0, 0, -1.0, 0] },
+                    { text: "Mă fascinează procedurile endovasculare sau cateterismele introduse pe incizii minime, lucrând predominant ghidat de raze X.", mods: [1.5, 1.0, -1.0, 1.0, 0.5, 0, 0, 2.0, 0.5, 0] }
+                ]
+            },
+            MEDICAL: {
+                name: "Medicină Clinică (Adulți)",
+                questions: [
+                    { text: "Consider că utilizarea procedurilor fizice curente (ecografii, endoscopii, infiltrații) este o parte esențială a muncii mele ideale.", mods: [2.5, 0.5, -0.5, 1.0, 0, 0, 0, 1.5, -0.5, 0] },
+                    { text: "Mă fascinează descifrarea mecanismelor autoimune complexe, a bolilor sistemice sau a infecțiilor rare.", mods: [-0.5, 0.5, 1.0, 2.5, 0, 0, 0, 1.0, 0, 0] },
+                    { text: "Mă simt extrem de pregătit să gestionez un stop cardiac sau o decompensare respiratorie severă direct în salonul meu de spital.", mods: [0.5, 2.5, 0, 1.0, -1.5, 0, 0, 0, 1.5, 0] },
+                    { text: "Pot menține o stare de obiectivitate clinică eficientă atunci când tratez zilnic pacienți oncologici în fază terminală.", mods: [0, 0.5, 1.5, 1.5, 0, 0, 1.5, 0, 0.5, 0] },
+                    { text: "Găsesc o mare satisfacție în a calibra interacțiunile medicamentoase la un pacient care ia zilnic peste 10 pastile diferite.", mods: [-1.0, 0, 1.0, 2.5, 1.0, 0, 0, 0, 0, 0] },
+                    { text: "Aș prefera ca activitatea mea să se desfășoare exclusiv la patul bolnavului în spitale terțiare, nu în cabinete private.", mods: [0.5, 1.5, 1.0, 1.5, -1.5, 0, 0, 0.5, 2.0, -2.0] },
+                    { text: "Doresc să aloc o parte semnificativă din consultație pentru a consilia și educa pacientul privind modificarea stilului de viață.", mods: [-1.0, -1.0, 2.5, 1.0, 1.5, 0.5, 0, -1.0, -0.5, 1.0] },
+                    { text: "Mă pasionează profund interpretarea EKG-urilor, a parametrilor hemodinamici și ritmul alert al diagnosticului cardiovascular.", mods: [1.0, 2.0, 0.5, 1.5, -1.0, 0, 0, 1.5, 1.0, 0] },
+                    { text: "Consider că a scrie rapoarte medicale, bilete de externare și scrisori metodice lungi este o activitate plăcută și utilă.", mods: [-1.5, -1.5, -0.5, 1.5, 1.5, 0, 0, 0, -1.0, 0.5] },
+                    { text: "Aș fi foarte interesat să particip activ la publicarea de articole științifice și trialuri clinice academice.", mods: [-0.5, 0, 0.5, 2.0, 0.5, 0, 0, 1.5, 1.0, -0.5] },
+                    { text: "Aș alege să tratez mai degrabă un organ izolat (rinichi, inimă) în profunzime extremă, decât să am o viziune generalistă asupra întregului corp.", mods: [0.5, 1.0, -1.0, 1.5, -0.5, 0, 0, 1.0, 0.5, 0] },
+                    { text: "Modificările imagistice microscopice pe care le văd la o endoscopie sau bronhoscopie îmi trezesc o curiozitate vizuală imensă.", mods: [1.5, 0.5, -0.5, 1.5, 0, 0, 0, 1.5, 0.5, 0] },
+                    { text: "Dacă un pacient cronic refuză internarea, deși e necesară, folosesc persuasiunea empatică îndelungată pentru a-l convinge, nu devin autoritar.", mods: [-0.5, -0.5, 2.0, 0.5, 0.5, 0, 0, -0.5, -0.5, 0.5] },
+                    { text: "Sunt fascinat de ramura neurologică, mapând deficitele fizice direct pe traseele anatomice cerebrale.", mods: [0.5, 1.0, 0, 2.5, 0.5, 0, 0, 1.5, 0.5, 0] },
+                    { text: "Simt că aș avea succes extraordinar în a gestiona o clinică privată de boli interne sau cardiologie, ocupându-mă activ de creșterea ei financiară.", mods: [-0.5, -1.0, 1.5, 0.5, 1.5, 0, 0, 0, -1.5, 2.5] }
+                ]
+            },
+            PARACLINIC: {
+                name: "Paraclinic, Tehnologie & Laborator",
+                questions: [
+                    { text: "Prefer să vizualizez corpul uman prin intermediul reconstrucțiilor imagistice 3D, radiografiilor și ecranelor, în detrimentul palpării.", mods: [0.5, 0, -2.0, 2.0, 1.5, 0, 0, 2.5, -1.0, 0] },
+                    { text: "Secțiunile celulare pe lame, microscopul și imunohistochimia reprezintă pentru mine cea mai curată formă de medicină.", mods: [1.5, -1.0, -2.5, 2.5, 1.5, 0, 0, 2.0, -1.5, 0] },
+                    { text: "Sunt extrem de atras de medicina legală, autopsii și interacțiunea cu sistemul judiciar.", mods: [1.5, 1.5, -1.5, 2.0, 0.5, 0, 0, 1.0, -0.5, 0] },
+                    { text: "Mă responsabilizează pozitiv faptul că diagnosticul meu (scris pe o foaie) dictează dacă pacientul are sau nu cancer.", mods: [0.5, 0.5, -1.0, 2.5, 0.5, 0, 0, 1.0, 0, 0] },
+                    { text: "Consider că implementarea Inteligenței Artificiale (AI) în recunoașterea imaginilor sau datelor va fi asistentul meu principal.", mods: [-0.5, 0, -1.0, 2.0, 1.0, 0, 0, 2.5, -1.0, 0.5] },
+                    { text: "Rutina zilnică de a analiza peste 100 de imagini sau probe identice îmi oferă viteză, concentrare și satisfacție.", mods: [-0.5, -0.5, -1.5, 2.0, 2.0, 0, 0, 1.5, -1.5, 0] },
+                    { text: "Aș prefera să îmi desfășor activitatea pur în domeniul sănătății publice, epidemiologiei și statisticilor demografice.", mods: [-2.0, -1.5, -1.0, 1.5, 2.5, 0, 0, 1.5, -0.5, 1.0] },
+                    { text: "Comunicarea telefonică a rezultatelor critice colegilor din spital este singura interacțiune de care am nevoie într-o zi.", mods: [0, 1.0, -2.0, 1.5, 1.0, 0, 0, 1.0, 0.5, 0] },
+                    { text: "Riscul expunerii la radiații ionizante, formaldehidă sau agenți infecțioși în laborator nu mă sperie deloc.", mods: [0.5, 0.5, -1.0, 1.0, 0.5, 0, 0, 1.5, 0, 0] },
+                    { text: "Visul meu este să conduc managerial un lanț de laboratoare private sau centre de imagistică de succes.", mods: [-1.0, -1.0, -1.0, 1.0, 1.5, 0, 0, 1.5, -1.0, 2.5] },
+                    { text: "Timpul ideal petrecut de mine discutând fizic cu un pacient ar trebui să tindă spre zero minute.", mods: [-1.5, -1.5, -2.5, 1.0, 1.5, 0, 0, 1.5, -1.5, 0] },
+                    { text: "Sunt pasionat de managementul substanțelor toxice, trasabilitatea probelor medicale și acreditările de tip ISO în spital.", mods: [-1.0, -1.0, -1.5, 1.5, 2.0, 0, 0, 1.0, -0.5, 1.5] },
+                    { text: "Ideea de a nu primi niciodată mulțumiri sau recunoștință directă din partea pacientului nu mă deranjează, atâta timp cât medicii mă respectă.", mods: [-0.5, 0, -2.0, 1.5, 1.0, 0, 0, 0.5, 1.5, 0] },
+                    { text: "Mă entuziasmează fizica radiațiilor, fizica nucleară sau aparatura hiper-complexă folosită în radioterapie.", mods: [0.5, 0, -1.5, 2.0, 1.0, 0, 0, 2.5, 0.5, 0] },
+                    { text: "Prefer să ofer certitudini absolute sau rapoarte definitive, în loc să monitorizez boli incerte care se schimbă zilnic.", mods: [0.5, -1.0, -1.5, 2.0, 1.5, 0, 0, 1.5, 0.5, 0.5] }
+                ]
+            },
+            RELATIONAL: {
+                name: "Medicină Psihosocială & Cronică",
+                questions: [
+                    { text: "Latura care mă atrage cel mai mult în medicină este descifrarea comportamentului uman și a tulburărilor neuropsihice.", mods: [-1.5, -0.5, 2.5, 2.0, 1.0, 0, 0, -1.0, -0.5, 0.5] },
+                    { text: "Vreau ca activitatea mea să includă îngrijirea integrată a familiilor întregi, din generație în generație (de la sugar la bunic).", mods: [-0.5, -0.5, 2.5, 1.0, 1.5, 2.0, 0, -1.0, -1.0, 1.5] },
+                    { text: "Sunt extrem de atras de utilizarea psihoterapiei și a comunicării ca tratament principal, în locul medicației fizice.", mods: [-1.5, -1.0, 2.5, 1.5, 1.0, 0, 0, -1.5, -1.0, 0.5] },
+                    { text: "Mă consider foarte capabil să gestionez pacienți cu adicții severe (droguri, alcool) fără a deveni frustrat de recidivele lor.", mods: [-1.0, 0, 2.5, 1.5, 0.5, 0, 0, -1.0, 0, 0] },
+                    { text: "Îmi doresc o profesie în care să pot efectua vizite medicale la domiciliul pacienților imobilizați sau terminali.", mods: [-1.0, -0.5, 2.5, 0.5, 1.0, 0, 1.0, -1.5, -1.0, 0.5] },
+                    { text: "Obiectivul meu este redarea calității vieții și a mobilității pacientului prin programe de recuperare, kinetoterapie și fizioterapie.", mods: [1.5, -1.0, 2.0, 0.5, 1.5, 0, 0, 0.5, 0.5, 1.0] },
+                    { text: "Îmi place să iau decizii complet independent în propriul meu cabinet de cartier sau clinică, fără șefi deasupra.", mods: [-1.0, -1.5, 1.5, 0.5, 2.0, 0, 0, -0.5, -2.0, 2.5] },
+                    { text: "Consider că burnout-ul de compasiune (suferința din cauza empatiei prea mari) este un risc real pentru mine dacă aș vedea suferință zilnic.", mods: [-0.5, -1.0, 1.5, -0.5, 1.0, 0, -1.5, 0, 0, 0] },
+                    { text: "Mă atrage geriatria: consulturile lente, cu răbdare, pentru optimizarea medicației și a stilului de viață la vârstnici.", mods: [-1.0, -1.0, 2.5, 1.5, 1.5, -1.0, 0, -1.0, -1.0, 0.5] },
+                    { text: "Apreciez un stil de viață cu puține urgențe majore, permițându-mi să îmi aloc mult timp vieții personale.", mods: [-1.0, -2.5, 1.0, 0.5, 2.5, 0.5, 0, 0, -1.5, 1.0] },
+                    { text: "Aș prescrie cu calm antidepresive sau antipsihotice, înțelegând mecanismul fin al neuro-transmițătorilor.", mods: [-1.0, 0, 1.5, 2.0, 1.0, 0, 0, 0.5, 0, 0] },
+                    { text: "În fața unui pacient ipohondru sau anxios, nu mă grăbesc să îl trimit acasă, ci îi ofer suport emoțional îndelungat.", mods: [-1.0, -1.0, 2.5, 0.5, 0.5, 0, 0, -1.0, -0.5, 0.5] },
+                    { text: "Faptul că pacienții psihiatrici sau geriatrici nu respectă tratamentul sau sunt confuzi nu mă înfurie profesional deloc.", mods: [-0.5, -1.0, 2.0, 1.0, 0.5, 0, 0, -1.0, 0, 0] },
+                    { text: "Sunt interesat să devin pilonul central de sănătate al unei mici comunități rurale sau peri-urbane (medic de țară/comună).", mods: [-1.0, -1.0, 2.5, 0.5, 2.0, 1.5, 0, -1.0, -1.5, 2.0] },
+                    { text: "Sunt capabil să evaluez legal capacitatea de muncă a unor pacienți care simulează boala, menținându-mi obiectivitatea și fermitatea.", mods: [-0.5, -0.5, 0.5, 1.5, 1.5, 0, 0, 0.5, -0.5, 1.0] }
+                ]
+            },
+            PEDIATRIC: {
+                name: "Pediatrie & Neonatologie",
+                questions: [
+                    { text: "Îmi doresc să efectuez manevre manuale fine, critice (intubații, cateterisme) pe corpuri extrem de fragile (prematuri de 600g).", mods: [2.5, 2.5, -1.0, 1.5, -2.0, 1.5, 1.0, 1.5, 2.0, -1.0] },
+                    { text: "Mă fascinează diagnosticul bolilor organice (infecții, boli renale) la copii folosind o abordare clinică și medicamente.", mods: [-1.0, 0.5, 1.5, 2.0, 1.0, 2.5, 0, 0.5, 0.5, 0] },
+                    { text: "Vreau să operez copii în mod direct, corectând malformații structurale sau rezolvând traumatisme ortopedice.", mods: [2.5, 1.5, 0, 1.0, -1.0, 2.0, 0, 1.0, 2.0, 0] },
+                    { text: "Am echilibrul mintal de a lucra pe o secție de oncologie pediatrică, asistând frecvent la degradarea copiilor bolnavi de cancer.", mods: [-0.5, 1.0, 2.0, 2.0, -1.0, 2.0, 2.5, 1.0, 1.5, -0.5] },
+                    { text: "Mă atrage foarte mult evaluarea neurodezvoltării, a autismului sau a tulburărilor de atenție (ADHD) la copii și adolescenți.", mods: [-1.5, -0.5, 2.5, 2.0, 1.5, 2.5, 0, -1.0, -0.5, 0.5] },
+                    { text: "Consider că abilitatea mea de a calma părinții panicați este chiar mai valoroasă decât capacitatea de a calma copilul.", mods: [-0.5, 0.5, 2.5, 0.5, 0.5, 2.0, 0, -1.0, 0.5, 0.5] },
+                    { text: "Prefer pacienții non-verbali (sugari) unde diagnosticul este pur obiectiv și deductiv, fără anamneză directă.", mods: [0.5, 1.5, 0.5, 2.5, -0.5, 2.5, 0, 1.5, 1.0, 0] },
+                    { text: "Mă simt foarte pregătit să intervin la stopuri cardio-respiratorii și urgențe majore în departamentele pediatrice.", mods: [1.0, 2.5, 0.5, 1.5, -2.0, 1.5, 1.5, 1.0, 2.0, 0] },
+                    { text: "Mă fascinează bolile cardiace congenitale la copii și vreau să mă specializez pe hemodinamică și ecocord infantil.", mods: [1.0, 2.0, 0.5, 2.5, -1.0, 2.0, 0, 2.0, 1.5, 0] },
+                    { text: "Sunt capabil să gestionez legal și emoțional situațiile dificile în care suspectez abuz sau neglijare a copilului în familie.", mods: [-0.5, 0.5, 1.5, 1.5, 0, 2.0, 1.0, 0, 1.0, -0.5] },
+                    { text: "Aș fi foarte interesat de un program de genetică pediatrică, comunicând riscurile ereditare viitorilor părinți.", mods: [-1.0, -0.5, 1.5, 2.5, 1.0, 1.5, 0, 1.5, 0.5, 0] },
+                    { text: "Tulburările de alimentație sau anxietatea severă la adolescenți mi se par mai interesante decât virozele respiratorii comune.", mods: [-1.0, -1.0, 2.0, 1.5, 1.5, 2.0, 0, -1.0, 0.5, 0.5] },
+                    { text: "Mă responsabilizează imens și mă atrage ideea de a ventila mecanic nou-născuții intubați, analizând ventilația pe ecrane detaliate.", mods: [1.0, 2.0, -1.0, 1.5, -2.0, 1.5, 1.0, 2.5, 2.0, -0.5] },
+                    { text: "Prefer intervențiile invazive scurte și eficiente pe copii sănătoși altminteri (ex: apendicectomie simplă), nu pacienți cronicizați.", mods: [2.0, 1.5, -0.5, -1.0, 0, 1.5, 0, -0.5, 1.5, 0] },
+                    { text: "Pot zâmbi și mă pot juca sincer cu un copil, chiar dacă știu că prognosticul lui neurologic sau vital este extrem de sumbru.", mods: [0, 0.5, 2.5, 0.5, -0.5, 2.5, 2.5, 0, 1.0, 0] }
+                ]
+            }
+        };
+
+        const adaptEngine = {
+            currentStage: 1,
+            currentQuestionIdx: 0,
+            isSurgicalLocked: false,
+            isPediatricLocked: false,
+            userVector: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0],
+            dominantBranch: null,
+
+            start() {
+                this.currentStage = 1; 
+                this.currentQuestionIdx = 0;
+                this.isSurgicalLocked = false; 
+                this.isPediatricLocked = false;
+                this.userVector = [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0];
+                this.dominantBranch = null;
+
+                document.getElementById('screen-intro').classList.add('hidden');
+                document.getElementById('screen-results').classList.add('hidden');
+                document.getElementById('screen-transition').classList.add('hidden');
+                document.getElementById('screen-quiz').classList.remove('hidden');
+                
+                this.renderQuestion();
+            },
+
+            renderQuestion() {
+                let q;
+                const counterSpan = document.getElementById('question-counter');
+                const badgeStage = document.getElementById('badge-stage');
+                const badgeCategory = document.getElementById('badge-category');
+                const progressBar = document.getElementById('progress-indicator');
+                
+                if (this.currentStage === 1) {
+                    q = STAGE_1_QUESTIONS[this.currentQuestionIdx];
+                    badgeStage.innerText = "Etapa 1: Profilare Generală";
+                    badgeCategory.innerText = q.category || "Afirmație";
+                    counterSpan.innerText = `Afirmația ${this.currentQuestionIdx + 1} din 40`;
+                    progressBar.style.width = `${(this.currentQuestionIdx / 40) * 100}%`;
+                } else {
+                    const branchData = DEEP_DIVE_BRANCHES[this.dominantBranch];
+                    q = branchData.questions[this.currentQuestionIdx];
+                    badgeStage.innerText = `Etapa 2: Aprofundare ${branchData.name}`;
+                    badgeCategory.innerText = "Afirmație Specifică";
+                    counterSpan.innerText = `Afirmația ${25 + this.currentQuestionIdx + 1} din 40`;
+                    progressBar.style.width = `${((25 + this.currentQuestionIdx) / 40) * 100}%`;
+                }
+
+                document.getElementById('question-text').innerText = q.text;
+                
+                const container = document.getElementById('options-container');
+                container.innerHTML = '';
+
+                const agreements = [
+                    { label: "Dezacord Total", scale: -1.0 },
+                    { label: "Dezacord", scale: -0.5 },
+                    { label: "Neutru", scale: 0.0 },
+                    { label: "Acord", scale: 0.5 },
+                    { label: "Acord Total", scale: 1.0 }
+                ];
+
+                agreements.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "likert-btn w-full text-left p-4 rounded-2xl transition duration-200 flex items-center group active:scale-[0.99] text-sm md:text-base font-semibold text-slate-300";
+                    btn.innerHTML = `
+                        <div class="likert-number flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-slate-400 transition-all mr-4">
+                            ${idx + 1}
+                        </div>
+                        <div class="group-hover:text-white transition-colors">
+                            ${opt.label}
+                        </div>
+                    `;
+                    btn.onclick = () => this.handleAnswer(q, opt.scale);
+                    container.appendChild(btn);
+                });
+            },
+
+            handleAnswer(questionData, scale) {
+                for (let i = 0; i < 10; i++) {
+                    if (questionData.mods && questionData.mods[i] !== undefined) {
+                        this.userVector[i] += questionData.mods[i] * scale;
+                        this.userVector[i] = Math.max(0, Math.min(10, this.userVector[i]));
+                    }
+                }
+
+                if (questionData.lockTrigger) {
+                    if (scale <= questionData.lockTrigger.threshold) {
+                        if (questionData.lockTrigger.type === 'surgical') this.isSurgicalLocked = true;
+                        if (questionData.lockTrigger.type === 'pediatric') this.isPediatricLocked = true;
+                    }
+                }
+
+                if (this.currentStage === 1) {
+                    if (this.currentQuestionIdx < STAGE_1_QUESTIONS.length - 1) {
+                        this.currentQuestionIdx++;
+                        this.renderQuestion();
+                    } else {
+                        this.transitionToStage2();
+                    }
+                } else {
+                    const totalStage2 = DEEP_DIVE_BRANCHES[this.dominantBranch].questions.length;
+                    if (this.currentQuestionIdx < totalStage2 - 1) {
+                        this.currentQuestionIdx++;
+                        this.renderQuestion();
+                    } else {
+                        this.calculateFinalResults();
+                    }
+                }
+            },
+
+            transitionToStage2() {
+                const scores = {
+                    SURGICAL: (this.userVector[0] * 1.5) + (this.userVector[1] * 1.2) - (this.userVector[4] * 0.5),
+                    MEDICAL: (this.userVector[3] * 1.5) + (this.userVector[2] * 0.8),
+                    PARACLINIC: (this.userVector[7] * 1.5) + (this.userVector[3] * 1.0) - (this.userVector[2] * 1.0),
+                    RELATIONAL: (this.userVector[2] * 1.8) + (this.userVector[4] * 0.8),
+                    PEDIATRIC: (this.userVector[5] * 2.5) + (this.userVector[6] * 0.5)
+                };
+
+                let sorted = Object.keys(scores).map(k => ({branch: k, val: scores[k]})).sort((a,b)=>b.val-a.val);
+                let chosen = null;
+                
+                for (let e of sorted) {
+                    if (this.isSurgicalLocked && e.branch === 'SURGICAL') continue;
+                    if (this.isPediatricLocked && e.branch === 'PEDIATRIC') continue;
+                    chosen = e.branch; 
+                    break;
+                }
+                
+                this.dominantBranch = chosen || 'MEDICAL';
+                
+                document.getElementById('screen-quiz').classList.add('hidden');
+                document.getElementById('screen-transition').classList.remove('hidden');
+                
+                const names = { 
+                    SURGICAL: "Chirurgie & Intervențional", 
+                    MEDICAL: "Medicină Clinică (Adulți)", 
+                    PARACLINIC: "Paraclinic, Tehnologie & Laborator", 
+                    RELATIONAL: "Medicină Psihosocială & Cronică", 
+                    PEDIATRIC: "Pediatrie & Neonatologie" 
+                };
+                document.getElementById('transition-branch-name').innerText = names[this.dominantBranch];
+            },
+
+            continueToStage2() {
+                this.currentStage = 2; 
+                this.currentQuestionIdx = 0;
+                document.getElementById('screen-transition').classList.add('hidden');
+                document.getElementById('screen-quiz').classList.remove('hidden');
+                this.renderQuestion();
+            },
+
+            calculateFinalResults() {
+                const weights = [1.0, 1.0, 1.0, 1.0, 1.2, 1.0, 1.2, 1.0, 0.8, 0.8]; 
+                
+                const scored = SPECIALTIES_CATALOG.map(spec => {
+                    let sumSquared = 0;
+                    let maxPossible = 0;
+                    
+                    for (let i = 0; i < 10; i++) {
+                        sumSquared += weights[i] * Math.pow(this.userVector[i] - spec.profile[i], 2);
+                        maxPossible += weights[i] * 100; 
+                    }
+                    
+                    let pct = Math.round((1 - (Math.sqrt(sumSquared) / Math.sqrt(maxPossible))) * 100);
+                    pct = Math.round(25 + (pct - 25) * 0.95);
+
+                    if (this.isSurgicalLocked && spec.isSurgPure) pct = 0;
+                    if (this.isPediatricLocked && (spec.cat === "PEDIATRIC" || spec.name.includes("PEDIATRIC") || spec.name === "NEONATOLOGIE")) pct = 0;
+
+                    return { 
+                        name: spec.name, 
+                        cat: spec.cat, 
+                        matchPct: Math.max(0, Math.min(100, pct)), 
+                        profile: spec.profile 
+                    };
+                }).sort((a,b)=>b.matchPct - a.matchPct);
+
+                this.renderDashboard(scored);
+            },
+
+            renderDashboard(scored) {
+                document.getElementById('screen-quiz').classList.add('hidden');
+                document.getElementById('screen-results').classList.remove('hidden');
+
+                const locks = document.getElementById('locks-notifications'); 
+                locks.innerHTML = '';
+                if (this.isSurgicalLocked) {
+                    locks.innerHTML += `<div class="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-medium"><i class="fa-solid fa-lock mr-2"></i><strong>FILTRU CHIRURGIE ACTIVAT:</strong> Specialitățile invazive au fost eliminate din cauza aversiunii la fluide/săli de operație.</div>`;
+                }
+                if (this.isPediatricLocked) {
+                    locks.innerHTML += `<div class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-xs font-medium"><i class="fa-solid fa-lock mr-2"></i><strong>FILTRU PEDIATRIE ACTIVAT:</strong> Subspecialitățile infantile au fost eliminate din cauza oboselii la interacțiunea cu copiii/părinții.</div>`;
+                }
+                locks.className = locks.innerHTML ? "space-y-2 mb-6" : "hidden";
+
+                const dashboard = document.getElementById('macro-dashboard'); 
+                dashboard.innerHTML = '';
+                const labels = [
+                    { label: "Manualitate / Chirurgie", val: this.userVector[0], color: "from-rose-500 to-rose-600", text: "text-rose-400" },
+                    { label: "Rezistență Acută / UPU", val: this.userVector[1], color: "from-amber-500 to-amber-600", text: "text-amber-400" },
+                    { label: "Contact Pacient / Empatie", val: this.userVector[2], color: "from-emerald-500 to-emerald-600", text: "text-emerald-400" },
+                    { label: "Puzzle / Complexitate", val: this.userVector[3], color: "from-sky-500 to-sky-600", text: "text-sky-400" },
+                    { label: "Atracție Tehnologie", val: this.userVector[7], color: "from-cyan-500 to-cyan-600", text: "text-cyan-400" },
+                    { label: "Predictibilitate / Lifestyle", val: this.userVector[4], color: "from-indigo-500 to-indigo-600", text: "text-indigo-400" }
+                ];
+
+                labels.forEach(dim => {
+                    dashboard.innerHTML += `<div class="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl shadow-sm">
+                        <div class="flex justify-between items-center mb-2"><span class="text-[11px] font-bold text-slate-300 uppercase">${dim.label}</span><span class="text-xs font-extrabold ${dim.text}">${dim.val.toFixed(1)}/10</span></div>
+                        <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r ${dim.color}" style="width: ${dim.val*10}%"></div></div>
+                    </div>`;
+                });
+
+                const top5 = document.getElementById('top-5-container'); 
+                top5.innerHTML = '';
+                scored.slice(0, 5).forEach((spec, i) => {
+                    let arg = "Corelație excelentă prin algoritmul de distanță 10D.";
+                    if (spec.profile[5] >= 9 && this.userVector[5] >= 7) arg = "Răbdarea ta excelentă și anduranța la dinamica pediatrică te fac perfect pentru această zonă.";
+                    if (spec.profile[0] >= 9 && this.userVector[0] >= 7) arg = "Manualitatea fină combinată cu rezistența la stres indică o potrivire organică pentru sala de operație.";
+                    if (spec.profile[9] >= 8 && this.userVector[9] >= 7) arg = "Capacitățile tale antreprenoriale și dorința de autonomie completează perfect nevoile administrative ale acestei ramuri.";
+
+                    top5.innerHTML += `<div class="p-4 bg-slate-900/40 border border-slate-800 rounded-2xl flex gap-4 items-center">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-black text-sm shrink-0">#${i+1}</div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-extrabold text-white text-xs sm:text-sm uppercase tracking-wide leading-tight">${spec.name}</h4>
+                                <span class="text-xs font-black text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">${spec.matchPct}%</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 leading-snug hidden sm:block">${arg}</p>
+                        </div>
+                    </div>`;
+                });
+
+                const list = document.getElementById('all-specialties-list'); 
+                list.innerHTML = '';
+                scored.forEach((spec, idx) => {
+                    list.innerHTML += `<div class="specialty-item flex items-center justify-between py-2.5 px-3 rounded-lg bg-slate-900/40 border border-slate-800 text-[11px] hover:bg-slate-800 transition" data-name="${spec.name.toLowerCase()}">
+                        <div class="flex items-center gap-3"><span class="font-bold text-slate-500 w-4">${idx + 1}</span><span class="font-semibold text-slate-300 uppercase">${spec.name}</span></div>
+                        <span class="font-extrabold text-slate-400">${spec.matchPct}%</span>
+                    </div>`;
+                });
+            }
+        };
+
+        function filterSpecialties() {
+            const f = document.getElementById('specialty-search').value.toLowerCase();
+            const items = document.getElementsByClassName('specialty-item');
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.toggle('hidden', !items[i].getAttribute('data-name').includes(f));
+            }
+        }
+
+        function toggleAllSpecialties() {
+            const c = document.getElementById('all-specialties-container');
+            c.classList.toggle('hidden');
+            document.getElementById('toggle-icon').classList.toggle('fa-chevron-up');
+            document.getElementById('toggle-icon').classList.toggle('fa-chevron-down');
+        }
+    </script>
+</body>
+</html>
